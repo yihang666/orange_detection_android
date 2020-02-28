@@ -298,8 +298,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     JsonObject jsonObject = jsonParser.parse(result).getAsJsonObject();
                     // 获取返回数据
                     String file_name = jsonObject.get("flie_name").getAsString();
-                    String box_num = jsonObject.get("box_num").getAsString();
-                    mTextView.setText(box_num);
+                    final String box_num = jsonObject.get("box_num").getAsString();
+                    //mTextView.setText(box_num);
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            mTextView.setText(box_num);
+                        }
+                    });
 
                     // 接受返回的图片流，并转换成图片显示在imageView1上
                     // String img_strean = jsonObject.get("img_strean(base64)").getAsString();
