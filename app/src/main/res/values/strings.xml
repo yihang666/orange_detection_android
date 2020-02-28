@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">ImagePost</string>
+    <string name="openPhoto">打开相册</string>
+</resources>
