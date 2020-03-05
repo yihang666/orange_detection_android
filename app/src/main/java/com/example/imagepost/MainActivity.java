@@ -1,5 +1,6 @@
 package com.example.imagepost;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -13,10 +14,13 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.Message;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.util.Base64;
@@ -28,9 +32,12 @@ import android.view.Window;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
@@ -38,6 +45,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -47,6 +57,8 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+
+import static android.media.audiofx.AudioEffect.SUCCESS;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -67,6 +79,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Dialog dialog;
     private String filePath;
     private int sdkVersion = Integer.valueOf(android.os.Build.VERSION.SDK);
+    private static final int SUCCESS = 1;
+    private static final int FALL = 2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,6 +93,29 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         initClick();
 
     }
+
+    Handler handler = new Handler(){
+        @Override
+        public void handleMessage(@NonNull Message msg) {
+            super.handleMessage(msg);
+            switch (msg.what){
+                //加载网络成功进行UI的更新,处理得到的图片资源
+                case SUCCESS:
+                    //通过message，拿到字节数组
+                    byte[] Picture = (byte[]) msg.obj;
+                    //使用BitmapFactory工厂，把字节数组转化为bitmap
+                    Bitmap bitmap = BitmapFactory.decodeByteArray(Picture, 0, Picture.length);
+                    //通过imageview，设置图片
+                    imageView1.setImageBitmap(bitmap);
+
+                    break;
+                //当加载网络失败执行的逻辑代码
+                case FALL:
+                    Toast.makeText(MainActivity.this, "网络出现了问题", Toast.LENGTH_SHORT).show();
+                    break;
+            }
+        }
+    };
 
     private void initClick() {
         mButton.setOnClickListener(this);
@@ -208,9 +245,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     imgString = bitmapToBase64(bitmap);
 
                     // 此部分代码用于检测base64处理图片成功与否
-                    // Log.d(TAG,"bitmap"+imgString);
-                    // Bitmap bitmap2 = PhotoUtils.base64ToBitmap(imgString);
-                    // imageView1.setImageBitmap(bitmap2);
+                    Log.d(TAG,"bitmap"+imgString);
+                    //Bitmap bitmap2 = PhotoUtils.base64ToBitmap(imgString);
+                    //imageView1.setImageBitmap(bitmap2);
 
                     dialog.dismiss();
                     okHttpUploadImage(filePath);
@@ -267,6 +304,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         return result;
     }
 
+    public static byte[] GetUserHead(String img_url) throws IOException {
+        URL url = new URL(img_url);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod("GET"); // 设置请求方法为GET
+        conn.setReadTimeout(5 * 1000); // 设置请求过时时间为5秒
+        InputStream inputStream = conn.getInputStream(); // 通过输入流获得图片数据
+        byte[] data = StreamTool.readInputStream(inputStream); // 获得图片的二进制数据
+        return data;
+
+    }
+
+
     // 上传图片
     private void okHttpUploadImage(String filePath) {
         // 创建 OkHttpClient
@@ -308,11 +357,37 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     });
 
                     // 接受返回的图片流，并转换成图片显示在imageView1上
-                    // String img_strean = jsonObject.get("img_strean(base64)").getAsString();
-                    // Log.d(TAG,"img_strean(base64)"+img_strean);
-                    // Bitmap bitmap = PhotoUtils.stringtoBitmap(img_strean);
-                    // Log.d(TAG,"bitmap"+bitmap);
-                    // imageView1.setImageBitmap(bitmap);
+                    //String img_strean = jsonObject.get("img_strean(base64)").getAsString();
+                    //Log.d(TAG,"img_strean(base64):"+img_strean);
+                    //Bitmap bitmap = PhotoUtils.stringtoBitmap(img_strean);
+                    //Log.d(TAG,"bitmap"+bitmap);
+                    //imageView1.setImageBitmap(bitmap);
+
+                    //通过URL接收返回的图片
+
+                    String back_img_url = jsonObject.get("back_url").getAsString();
+                    Request request = new Request.Builder().url(back_img_url).build();
+                    OkHttpClient okHttpClient = new OkHttpClient();
+                    Call call_back = okHttpClient.newCall(request);
+                    call_back.enqueue(new Callback() {
+                        @Override
+                        public void onFailure(@NotNull Call call, @NotNull IOException e) {
+
+                        }
+
+                        @Override
+                        public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                            //得到从网上获取资源，转换成我们想要的类型
+                            byte[] Picture_bt = response.body().bytes();
+                            //通过handler更新UI
+                            Message message = handler.obtainMessage();
+                            message.obj = Picture_bt;
+                            message.what = SUCCESS;
+                            handler.sendMessage(message);
+                        }
+                    });
+
+
 
                     Log.d(TAG, "数据上传成功："+"file_name:" + file_name + ";box_num:" + box_num);
 
@@ -328,6 +403,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
     }
+
+
 
     // 获取相册图片的路径，API19以下
     private String getFilePath_below19(Uri uri) {

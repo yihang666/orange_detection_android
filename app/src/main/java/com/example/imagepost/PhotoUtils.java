@@ -13,6 +13,8 @@ import android.util.Base64;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
+import okio.Utf8;
+
 public class PhotoUtils {
 
     public static void takePicture(Activity activity, Uri imageUri, int requestCode) {
@@ -49,8 +51,10 @@ public class PhotoUtils {
         //将字符串转换成Bitmap类型
         Bitmap bitmap = null;
         try {
-            byte[] bitmapArray;
-            bitmapArray = Base64.decode(string, Base64.DEFAULT);
+            //byte[] bitmapArray;
+            //bitmapArray = Base64.decode(string, Base64.DEFAULT);
+            byte convert[] = string.getBytes("ascii");
+            byte[] bitmapArray = Base64.decode(convert, Base64.DEFAULT);
             bitmap = BitmapFactory.decodeByteArray(bitmapArray, 0, bitmapArray.length);
         } catch (Exception e) {
             e.printStackTrace();
