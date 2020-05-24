@@ -1,12 +1,6 @@
 package com.example.imagepost;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-
 import android.annotation.TargetApi;
-import android.app.Activity;
 import android.app.Dialog;
 import android.content.ContentUris;
 import android.content.Context;
@@ -34,6 +28,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
@@ -58,13 +57,11 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-import static android.media.audiofx.AudioEffect.SUCCESS;
-
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     private Button mButton;
     private ImageView mImageView,imageView1;
-    private TextView mTextView;
+    private TextView mTextView,mTextViewTime,mTextViewName;
     private static String[] PERMISSIONS_STORAGE = {
             "android.permission.READ_EXTERNAL_STORAGE",
             "android.permission.WRITE_EXTERNAL_STORAGE",
@@ -126,6 +123,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mImageView = findViewById(R.id.imageView);
         imageView1 = findViewById(R.id.imageView1);
         mTextView = findViewById(R.id.textView);
+        mTextViewTime = findViewById(R.id.textView2);
+        mTextViewName = findViewById(R.id.textView3);
+
     }
 
 
@@ -185,7 +185,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     // 检测是否有写入权限
-    public static void verifyStoragePermissions(Activity activity) {
+    public static void verifyStoragePermissions(AppCompatActivity activity) {
         try {
             //检测是否有写的权限
             int permission = ActivityCompat.checkSelfPermission(activity,
@@ -217,6 +217,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     Bitmap bitmap = (Bitmap) bundle.get("data");
                     Log.d("MainActivity", "onActivityResult: " + bitmap);
                     File file = new File(Environment.getExternalStorageDirectory().getAbsoluteFile() + "/");
+                    //File file = new File(getExternalFilesDir(null) + "/");
                     if (!file.exists()) {
                         file.mkdir();
                     }
@@ -346,13 +347,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     JsonParser jsonParser = new JsonParser();
                     JsonObject jsonObject = jsonParser.parse(result).getAsJsonObject();
                     // 获取返回数据
-                    String file_name = jsonObject.get("flie_name").getAsString();
+                    final String file_name = jsonObject.get("flie_name").getAsString();
                     final String box_num = jsonObject.get("box_num").getAsString();
                     //mTextView.setText(box_num);
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
                             mTextView.setText(box_num);
+                            mTextViewName.setText(file_name);
                         }
                     });
 
@@ -386,8 +388,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             handler.sendMessage(message);
                         }
                     });
-
-
 
                     Log.d(TAG, "数据上传成功："+"file_name:" + file_name + ";box_num:" + box_num);
 

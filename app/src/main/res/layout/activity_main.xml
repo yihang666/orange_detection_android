@@ -4,40 +4,61 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    tools:context=".MainActivity"
     android:layout_marginLeft="20dp"
-    android:layout_marginRight="20dp">
+    android:layout_marginRight="20dp"
+    android:orientation="vertical"
+    tools:context=".MainActivity">
 
     <ImageView
         android:id="@+id/imageView"
-        android:layout_weight="1"
-        android:layout_marginTop="20dp"
         android:layout_width="match_parent"
-        android:layout_height="0dp" />
+        android:layout_height="0dp"
+        android:layout_marginTop="20dp"
+        android:layout_weight="1" />
 
     <Button
-        android:layout_marginTop="20dp"
         android:id="@+id/button"
-        android:layout_gravity="bottom"
-        android:layout_marginBottom="20dp"
         android:layout_width="match_parent"
         android:layout_height="60dp"
-        android:text="@string/openPhoto"/>
+        android:layout_gravity="bottom"
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="20dp"
+        android:text="@string/openPhoto" />
+
+    <TextClock
+        android:id="@+id/textView2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:format12Hour="yyyy/MM/dd HH:mm:ss"
+        android:format24Hour="yyyy/MM/dd HH:mm:ss"
+        android:text="时间"
+        android:textSize="20dp"
+        android:textStyle="bold" />
 
     <ImageView
         android:id="@+id/imageView1"
-        android:layout_weight="1"
-        android:layout_marginTop="20dp"
         android:layout_width="match_parent"
-        android:layout_height="0dp" />
+        android:layout_height="0dp"
+        android:layout_marginTop="20dp"
+        android:layout_weight="1" />
+
+    <TextView
+        android:id="@+id/textView3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="图片名"
+        android:textSize="20dp"
+        android:textStyle="bold" />
+
     <TextView
         android:id="@+id/textView"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:text="box_num"
-        android:textStyle="bold"
-        android:textSize="40dp"
-        android:gravity="center"/>
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="果识数"
+        android:textSize="20dp"
+        android:textStyle="bold" />
 
 </LinearLayout>

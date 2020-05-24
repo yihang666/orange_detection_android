@@ -1,6 +1,5 @@
 package com.example.imagepost;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -10,14 +9,14 @@ import android.os.Build;
 import android.provider.MediaStore;
 import android.util.Base64;
 
+import androidx.appcompat.app.AppCompatActivity;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-import okio.Utf8;
-
 public class PhotoUtils {
 
-    public static void takePicture(Activity activity, Uri imageUri, int requestCode) {
+    public static void takePicture(AppCompatActivity activity, Uri imageUri, int requestCode) {
         //调用系统相机
         Intent intentCamera = new Intent();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
